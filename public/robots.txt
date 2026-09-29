@@ -1,0 +1,6 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+Host: https://hedefteknolojibilisim.com
+Sitemap: https://hedefteknolojibilisim.com/sitemap.xml

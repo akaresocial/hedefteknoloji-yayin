@@ -1,0 +1,350 @@
+# ──────────────────────────────────────────────────────────────
+# Hedef Teknoloji — otomatik üretildi (scripts/build-htaccess.mjs)
+# Ortam: CANLI · Elle düzenlemeyin; config/legacy-redirects.json'u güncelleyin.
+# ──────────────────────────────────────────────────────────────
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html index.php
+DirectorySlash On
+AddDefaultCharset UTF-8
+ErrorDocument 404 /404.html
+ErrorDocument 410 /404.html
+
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType image/svg+xml .svg
+  AddType font/woff2 .woff2
+  AddType application/manifest+json .webmanifest
+  AddType application/vnd.android.package-archive .apk .APK
+</IfModule>
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# Yalnız bu sitenin adları. cPanel'de belge kökü public_html içinde olan başka bir alan adı bu dosyayı da
+# devralır; ona hiçbir kural (https/www yönlendirmesi, 403'ler) uygulanmaz. Sondaki nokta (hedefteknolojibilisim.com.)
+# da bu sitedir: sunucu onu aynı siteye eşler, %{HTTP_HOST} ise ham başlıktır — yoksa tek başlıkla 403'ler atlanırdı.
+RewriteCond %{HTTP_HOST} !^((www|mail)\.)?hedefteknolojibilisim\.com\.?(:[0-9]+)?$ [NC]
+RewriteRule ^ - [L]
+
+# SSL doğrulaması (AutoSSL / Let's Encrypt): /.well-known/ hiçbir kurala takılmaz, http'de bile yönlendirilmez
+RewriteRule ^\.well-known/ - [L]
+
+# Nokta ile başlayan tüm yollar (/.git, /.env, macOS ._ kopyaları …) ve iç PHP dosyaları (_smtp_client.php vb.) dışarıya kapalı.
+# Açık uç noktalar: api/form.php (formlar), api/yayin.php (anlık yayın tetiği; yalnız POST) — başlıkları api/.htaccess'te
+RewriteRule (^|/)\. - [F,L]
+RewriteRule ^api/_ - [F,L]
+
+# Kanonik adres: https + www olmadan (tek atlamada).
+# Hata sayfasının iç isteği (ErrorDocument → /404.html) yönlendirilmez; yoksa http'de 404 yerine 301 döner
+# (ör. /.well-known/ altında olmayan dosya — SSL doğrulaması 404 bekler).
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond %{REQUEST_URI} !^/404\.html$
+RewriteCond %{HTTP_HOST} ^www\.hedefteknolojibilisim\.com\.?(:[0-9]+)?$ [NC]
+RewriteRule ^(.*)$ https://hedefteknolojibilisim.com/$1 [R=301,L,NE]
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteCond %{REQUEST_URI} !^/404\.html$
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^(.*)$ https://hedefteknolojibilisim.com/$1 [R=301,L,NE]
+
+# /sayfa/index.html → /sayfa/ (yinelenen içerik olmasın)
+RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+RewriteRule ^(.*/)?index\.html$ /$1 [R=301,L]
+
+# WordPress eski sorgu adresleri (?p=, ?page_id=, ?product=) → ana sayfa
+RewriteCond %{QUERY_STRING} (^|&)(p|page_id|product|product_cat|post_type|s)= [NC]
+RewriteRule ^$ /? [R=301,L]
+
+# Next.js hata sayfalarının dizin kopyaları doğrudan açılmasın
+RewriteRule ^(404|_not-found)(/.*)?$ - [R=404,L]
+
+# Tema demosundan kalan şablon sayfaları: kalıcı olarak kaldırıldı
+RewriteRule ^(banner|footer|header|megamenu|title_section|model|pxl-template)/ - [G,L]
+
+# WordPress artıkları
+RewriteRule ^(wp-admin|wp-login\.php)(/.*)?$ / [R=301,L]
+RewriteRule ^(xmlrpc\.php|wp-json|wp-includes|wp-content|comments/feed)(/.*)?$ - [G,L]
+RewriteRule ^(.+)/feed/?$ /$1/ [R=301,L]
+RewriteRule ^feed/?$ / [R=301,L]
+
+# Eski WordPress adresleri → yeni hedefler (247 kural)
+RewriteRule ^category/news/?$ / [R=301,L]
+RewriteRule ^category/adblue-iptali/?$ https://hedefecu.com/hizmetlerimiz/adblue_iptali/ [R=301,L]
+RewriteRule ^category/dpf-iptali/?$ https://hedefecu.com/hizmetlerimiz/dpf_iptali/ [R=301,L]
+RewriteRule ^category/egr-iptali/?$ https://hedefecu.com/hizmetlerimiz/egr_iptali/ [R=301,L]
+RewriteRule ^easytronic-sanziman-tamir/?$ https://hedefecu.com/hizmetler/ [R=301,L]
+RewriteRule ^airbag-tamiri/?$ https://hedefecu.com/hizmetler/ [R=301,L]
+RewriteRule ^direksiyon-kutusu-tamiri/?$ https://hedefsteering.com/ [R=301,L]
+RewriteRule ^direksiyon-test-cihazi/?$ https://hedefsteering.com/eps-ehps-direksiyon-test-cihazi/ [R=301,L]
+RewriteRule ^dimsport-bayilik/?$ /bayilik/?marka=dimsport [R=301,L]
+RewriteRule ^autodata/?$ /markalar/autodata/ [R=301,L]
+RewriteRule ^izmir-oto-bakim-ve-tamir-servisi/?$ https://hedefecu.com/ [R=301,L]
+RewriteRule ^adblue-iptali/?$ https://hedefecu.com/hizmetlerimiz/adblue_iptali/ [R=301,L]
+RewriteRule ^chip-tuning/?$ https://hedefecu.com/hizmetlerimiz/chip-tuning/ [R=301,L]
+RewriteRule ^egr-iptali/?$ https://hedefecu.com/hizmetlerimiz/egr_iptali/ [R=301,L]
+RewriteRule ^dpf-iptali/?$ https://hedefecu.com/hizmetlerimiz/dpf_iptali/ [R=301,L]
+RewriteRule ^dimsport-chiptuning-turkey/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^dimsport/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^hesabim/?$ / [R=301,L]
+RewriteRule ^odeme/?$ / [R=301,L]
+RewriteRule ^sepet/?$ / [R=301,L]
+RewriteRule ^magaza/?$ /markalar/ [R=301,L]
+RewriteRule ^wishlist/?$ / [R=301,L]
+RewriteRule ^blog/?$ / [R=301,L]
+RewriteRule ^egr-iptali-nedir/?$ https://hedefecu.com/hizmetlerimiz/egr_iptali/ [R=301,L]
+RewriteRule ^chip-tuning-hizmeti/?$ https://hedefecu.com/hizmetlerimiz/chip-tuning/ [R=301,L]
+RewriteRule ^dpf-iptali-nedir/?$ https://hedefecu.com/partikul-filtresi-iptali-zararlari-var-mi-gercekler-ve-yanlis-bilinenler/ [R=301,L]
+RewriteRule ^mercedes-adblue-iptali-mercedes-euro-6-adblue-iptali/?$ https://hedefecu.com/hizmetlerimiz/adblue_iptali/ [R=301,L]
+RewriteRule ^urun/x-431-crp-mot-2-ariza-tespit-cihazi/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/launch-x431-crp-919-max-ariza-tespit-cihazi/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/mitsubishi-hyundai-1216-pin-universal-konnektor-launch-diagun-easydiag-x431/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/cat-501s-otomatik-sanziman-yagi-degistirme-makinasi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/cr-611/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/j-box-2-pass-thru-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/x-431-euro-tab-ariza-tespit-cihazi/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/x-431-pros-ariza-tespit-cihazi/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/x-431-hd-box3-agir-vasita-ariza-tespit-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/launch-pro-4-lite-1-yil-guncelleme-garantisi-ile/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/launch-x-431-pro-lite-ariza-tespit-cihazi/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/launch-crp-mod-ariza-tespit-cihazi/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/mercedes-sdconnect-4-ariza-tespit-cihazi-mercedes-c4/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/nitro-obd2-benzinli-performans-artirici-chip-tuning/?$ /markalar/hedef-ecu/ [R=301,L]
+RewriteRule ^urun/thinktool-lite-2/?$ https://thinktool.com.tr/urun/thinktool-lite-2-ariza-tespit-cihazi/ [R=301,L]
+RewriteRule ^urun/thinktool-master-x2/?$ https://thinktool.com.tr/urun/thinktool-master-x2-ariza-tespit-cihazi/ [R=301,L]
+RewriteRule ^urun/thinktool-reader7-ariza-tespit-cihazi/?$ https://thinktool.com.tr/urun/thinktool-reader-7-ariza-tespit-cihazi/ [R=301,L]
+RewriteRule ^urun/thinktool-master-2-ariza-tespit-cihazi/?$ https://thinktool.com.tr/urun/thinktool-master-2-ariza-tespit-cihazi/ [R=301,L]
+RewriteRule ^urun/autel-maxicheck-mx808-universal-ariza-tespit-cihazi/?$ https://auteltr.com/autel-mx808s/ [R=301,L]
+RewriteRule ^urun/thinktool-master/?$ https://thinktool.com.tr/urun/thinktool-master-ariza-tespit-cihazi/ [R=301,L]
+RewriteRule ^urun/linshang-ls237-oto-kaporta-boya-olcum-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/linshang-ls236-boya-olcum-cihazi-renkli-ve-cift-ekran/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/linshang-ls220-boya-olcum-cihazi-0-1um-hassasiyet/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/wabco-treyler-dorse-ariza-tespit-cihazidorse-treyler-kamyon/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/ancel-s300/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/daf-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/daf-euro-6-adblue-iptali [R=301,L]
+RewriteRule ^urun/atlas-euro-5-adblue-scr-iptali-hedef-teknoloji-bilisim/?$ https://hedefemulator.com/urun/atlas-euro-5-adblue-scr-iptali [R=301,L]
+RewriteRule ^urun/deutz-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/deutz-euro-6-adblue-iptali [R=301,L]
+RewriteRule ^urun/renault-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/renault-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/man-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/man-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/renault-can-clip-ariza-tespit-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/volvo-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/volvo-euro-6-adblue-iptali [R=301,L]
+RewriteRule ^urun/renault-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/renault-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/kar-kureme-araci-adblue-iptali/?$ https://hedefemulator.com/urun/kar-kureme-araci-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/tatra-phoenix-euro-6-adblue-iptali/?$ https://hedefemulator.com/urun/tatra-phoenix-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/hyundai-kia-gds-ariza-tespit-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/john-deere-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/john-deere-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/cat-caterpillar-ariza-tespit-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/volvo-vnl-euro-6-adblue-iptali/?$ https://hedefemulator.com/urun/volvo-vnl-adblue-emulator [R=301,L]
+RewriteRule ^urun/daf-lf-euro-5-adblue-iptal-cihazi/?$ https://hedefemulator.com/urun/daf-lf-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/iveco-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/iveco-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/opel-ariza-tespit-cihazi-mdi2/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/porsche-piwis-2-tester-ariza-tespit-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/bmw-icom-a3-nextcom-ariza-tespit-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/mini-pro-e-prom-kodlama-cihazi/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/new-holland-euro-6-adblue-iptal-emulator-kiti/?$ https://hedefemulator.com/urun/new-holland-euro6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/witech-micropod2-fiat-ariza-tespit-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/renault-euro-6-adblue-iptali-retarderli-araclar/?$ https://hedefemulator.com/urun/renault-euro-6-adblue-iptal-emulatoru-retarderli-araclar [R=301,L]
+RewriteRule ^urun/nexiq-2-is-makinasi-agir-vasita-ariza-tespit-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/case-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/case-euro-5-adblue-scr-iptali [R=301,L]
+RewriteRule ^urun/isuzu-novociti-life-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/isuzu-novociti-life-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/iveco-daily-euro-6-adblue-iptali/?$ https://hedefemulator.com/urun/iveco-daily-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/ford-1846-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/ford-1846-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/vas-5054-plus-volkswagen-audi-seat-skoda-ariza-tespit-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/temsa-safir-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/temsa-safir-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/daf-ariza-tespit-cihazi-davie-vci560/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/scania-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/scania-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/case-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/case-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/volvo-euro-6-adblue-iptali-retarderli-araclar/?$ https://hedefemulator.com/urun/volvo-euro-6-adblue-iptali-retarderli-araclar [R=301,L]
+RewriteRule ^urun/ford-cargo-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/ford-cargo-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/mercedes-agir-vasita-binek-ariza-tespit-cihazi-c5/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/cummins-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/cummins-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/mercedes-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/mercedes-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/man-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/man-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/iveco-trakker-euro-6-adblue-iptali/?$ https://hedefemulator.com/urun/iveco-trakker-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/iveco-ariza-tespit-cihazi-eltrac-easy/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/daf-euro-5-adblue-iptali/?$ https://hedefemulator.com/urun/daf-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/scania-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/scania-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/kess-v2-ecu-programlama-ve-chip-tuning-cihazi-yeni-versiyon-2-2/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/cummins-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/cummins-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/ford-euro-6-adblue-iptal-emulatoru/?$ https://hedefemulator.com/urun/ford-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/ford-tractor-euro-6-adblue-iptali/?$ https://hedefemulator.com/urun/ford-traktor-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/volvo-euro-5-adblue-scr-iptali/?$ https://hedefemulator.com/urun/volvo-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/tatra-phoenix-euro-6-adblue-iptali-2/?$ https://hedefemulator.com/urun/tatra-phoenix-euro-6-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/renault-euro-6-adblue-iptal-emulatoru-2/?$ https://hedefemulator.com/urun/renault-trucks-euro-6-2-adblue-scr-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/case-euro-4-adblue-iptali/?$ https://hedefemulator.com/urun/case-euro-4-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/cummins-euro-4-adblue-iptali/?$ https://hedefemulator.com/urun/cummins-euro-4-adblue-iptali [R=301,L]
+RewriteRule ^urun/vocom-volvo-ariza-tespit-cihazi-volvo-test-cihazi-orjinal/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/vocom-volvo-ariza-tespit-cihazi-volvo-test-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/daf-ariza-tespit-cihazi-vci-paccar-daf-vci-paccar/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/nexiq-usb-link-2-ariza-tespit-cihazi-nexiq-usb-link2-tester/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/cummins-inline-6-bmc-ariza-tespit-cihazi-bmc-cummins-inline/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/nexiq-usb-link-otokar-sultan-ariza-tespit-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/vcm2-ford-ids/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/scania-vci3-ariza-tespit-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/dimsport-new-genius-slave-full-beyin-programlama-cihazi/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/ford-ariza-tespit-cihazi-ids-vcm-2/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/peugeot-citroen-ariza-tespit-cihazi-lexia3/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/kess-v2-chip-tuning-beyin-programlama-cihaz/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/ktag-ecu-programlama-cihazi/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/mercedes-mp3-temic-euro-5-adblue-iptali/?$ https://hedefemulator.com/urun/mercedes-mp3-temic-euro-5-adblue-iptal-emulatoru [R=301,L]
+RewriteRule ^urun/thinkdiag-ariza-tespit-cihazi/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/thinkdiag-ariza-tespit-cihazi-tablet-dahil-set/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/thinktool-pros-ariza-tespit-cihazi/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/xtool-a80-pro-obd2-ecu-okuma-ve-yazma-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/thinkdiag-hml-agir-vasita-ariza-tespit-cihazi/?$ https://thinktool.com.tr/urun/thinktool-hml-box/ [R=301,L]
+RewriteRule ^urun/thinktool-master-x/?$ https://thinktool.com.tr/urun/thinktool-master-x-ariza-tespit-cihazi/ [R=301,L]
+RewriteRule ^urun/nissan-consult-3-plus-ariza-tespit-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/thinkcar-g3-immobilizer-kodlama-cihazi/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/thinktpms-g1-lastik-basinci-teshis-cihazi/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/thinktool-aku-test-cihazi/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/thinktpms-s1-programlanabilir-tpms-sensoru/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/iprog-iprog-pro-programci-araci/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/think-hizmet-bedeli/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/thinkcar-t-wand-200/?$ /markalar/thinktool/ [R=301,L]
+RewriteRule ^urun/xtool-a30-arac-ariza-tespit-cihazi-10-1-inc-tablet/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/magic-flex-ecu-programlama-chiptuning-cihazi/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/dpf-temizleme-cihazi/?$ https://hedefecu.com/hizmetlerimiz/dpf-temizligi/ [R=301,L]
+RewriteRule ^urun/thinktool-max/?$ https://thinktool.com.tr/urun/thinktool-max-ariza-tespit-cihazi/ [R=301,L]
+RewriteRule ^urun/renault-token/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/peugeot-207-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/peugeot-308-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/peugeot-partner-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/renault-clio-2-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/renault-clio3-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/renault-yeni-kangoo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/renault-megane-2-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/renault-scenic-3-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/renault-trafic-3-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/seat-cordoba-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/skoda-fabia-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/toyota-avensis-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/toyota-corolla-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volvo-s40-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volvo-v70-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volkswagen-caddy-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volkswagen-cordoba-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volkswagen-golf-6-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volkswagen-golf-7-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/new-genius-touch-map-ecu-okuma-ve-yazma-cihazi/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/audi-audi-a4-a5-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/chevrolet-aveo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/citroen-c4-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/citroen-jumpy-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/fiat-bravo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/fiat-grande-punto-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/fiat-panda-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/fiat-punto-188-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/fiat-punto-evo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/fiat-scudo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/ford-fiesta-yeni-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/ford-focus-2-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/ford-focus-3-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/ford-fusion-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/truck-explorer-v3-0-ariza-tespit-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/vocom-ii-volvo-ariza-tespit-cihazi-volvo-renault-test-cihazi/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/eprom-silici-eprom-eraser-eprom-uv-silici/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/euro-6-adblue-ariza-kod-silici-euro-6-dtc-ariza-kodu-silme-cihazi/?$ https://hedefemulator.com/kategori/dtc-hata-kodu-silici [R=301,L]
+RewriteRule ^urun/scania-vci-1-ariza-tespit-cihazi-scania-vci-1-diagnostik/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/jcb-is-makinalari-ve-jenerator-ariza-tespit-cihazi-jcb-diag/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/noe-knorr-bremse-otobus-kamyon-dorse-treyler-ariza-tespit/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/jaguar-land-rover-ariza-tespit-cihazi-jlr-doip-vci/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/volkswagen-passat-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volkswagen-yeni-passat-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volkswagen-yeni-polo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/volkswagen-polo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/bmw-10-pin-obd2-16-pin-cevirici-kablo-motosiklet-icin-2/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/ads5600-motosiklet-test-cihazi-ads5600-diagnostik/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/edc16-flash-tuning-edc16-flash-programlama-cihazi/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/galetto-kess-ktag-icin-bdm-soket-seti/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/nitro-obd2-super-red-performans-arttirici-chip-tuning-box/?$ /markalar/hedef-ecu/ [R=301,L]
+RewriteRule ^urun/nitro-obd2-dizel-performans-artirici-chip-tuning/?$ /markalar/hedef-ecu/ [R=301,L]
+RewriteRule ^urun/x-prog-programlayici-6-12-version-set/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/kwp2000-plus-ecu-chip-tuning-programlama-cihazi/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/galetto-4-chip-tuning-programlayici-fgtech-galetto-fgtech/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/car-prog-a1-obd2-kablo-carprog-kablo-2/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/vvdi-programlayici-set/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/x-prog-programlayici-5-84-version-set/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/opel-vectra-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/opel-yeni-meriva-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/opel-meriva-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/opel-corsa-d-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/opel-corsa-c-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/opel-corsa-b-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/opel-astra-j-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/nissan-micra-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/mercedes-a180-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/mazda-3-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/kia-ceed-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/hyundai-veloster-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/hyundai-ix35-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/hyundai-i30-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/hyundai-i20-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/hyundai-i10-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/hyundai-i40-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/hyundai-era-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/ford-mondeo-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/ford-galaxy-smax-direksiyon-kutusu/?$ https://hedefsteering.com/kapsam/ [R=301,L]
+RewriteRule ^urun/cr-801-821/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/crp-s5/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/cr-401/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/daf-vci-obd2-ariza-tespit-kablosu/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/cr-701701p/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/obd2-tester-obd2-sinyal-ve-protokol-test-cihazi/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/bmw-10-pin-obd2-16-pin-cevirici-kablo-motosiklet-icin/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/bmw-icom-lan-kablo-bmw-icom-a1-a2-a3-lan-kablo/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/crp-s1/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/mb-14-pin-obd2-cevirici-vw-lt-14-pin-obd2-cevirici/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/car-prog-a1-obd2-kablo-carprog-kablo/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun/x431-obd-kablo/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/iveco-easy-30-pin-kablo-99327017/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun/nissan-14-pin-obd-kablo/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/peugeot-citroen-30-pin-obd2-kablo-lexia-30-pin-kablo/?$ /markalar/ [R=301,L]
+RewriteRule ^urun/crp-s7/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun/cr-981/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun-kategori/genel/?$ /markalar/ [R=301,L]
+RewriteRule ^urun-kategori/ariza-tespit-cihazlari/?$ /markalar/ [R=301,L]
+RewriteRule ^urun-kategori/euro-6-adblue-iptal-emulatorleri/?$ https://hedefemulator.com/kategori/euro-6 [R=301,L]
+RewriteRule ^urun-kategori/euro-5-adblue-iptal-emulatorleri/?$ https://hedefemulator.com/kategori/euro-5 [R=301,L]
+RewriteRule ^urun-kategori/euro-4-adblue-iptal-emulatorleri/?$ https://hedefemulator.com/kategori/euro-4 [R=301,L]
+RewriteRule ^urun-kategori/ecu-programlama-cihazlari/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun-kategori/kablo-sarf-malzemeleri/?$ /markalar/ [R=301,L]
+RewriteRule ^urun-kategori/aku-takviye-cihazlari/?$ /markalar/ [R=301,L]
+RewriteRule ^urun-kategori/launch-ariza-tespit-cihazlari/?$ /markalar/launch/ [R=301,L]
+RewriteRule ^urun-kategori/ariza-tespit-cihazlari/agir-vasita-ariza-tespit/?$ /markalar/jaltest/ [R=301,L]
+RewriteRule ^urun-kategori/direksiyon-kutusu/?$ https://hedefsteering.com/ [R=301,L]
+RewriteRule ^urun-kategori/motorarizatespit/?$ /markalar/ [R=301,L]
+RewriteRule ^urun-kategori/chip-tuning-cihazlari/?$ /markalar/dimsport/ [R=301,L]
+RewriteRule ^urun-kategori/entegre-programlayicilar/?$ /markalar/ [R=301,L]
+RewriteRule ^urun-kategori/boya-olcum-cihazlari/?$ /markalar/ [R=301,L]
+
+# Listede olmayan eski ürün, kategori ve arşiv adresleri
+RewriteRule ^urun/ /markalar/ [R=301,L]
+RewriteRule ^urun-kategori/ /markalar/ [R=301,L]
+RewriteRule ^(category|tag|author)/ / [R=301,L]
+RewriteRule ^page/[0-9]+/?$ / [R=301,L]
+RewriteRule ^[0-9]{4}/[0-9]{2}/ / [R=301,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Yayın kimliği (ops/release.mjs yazar; sunucudaki canlı test ve release --wait okur): hiç önbelleğe alınmaz
+  <Files "version.txt">
+    Header set Cache-Control "no-store"
+  </Files>
+  # HTML her ziyarette doğrulanır; görseller 30 gün önbellekte
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.(svg|png|webp|jpg|jpeg|ico)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  # Yazı tiplerinin adında içerik özeti var (public/fonts, _next/static/media): bir yıl, değişmez
+  <FilesMatch "\.woff2$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

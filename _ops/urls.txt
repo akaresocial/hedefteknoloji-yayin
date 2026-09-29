@@ -1,0 +1,68 @@
+# otomatik — ops/release.mjs · satır: [GET|HEAD] <yol|tam adres> <beklenen kod> [beklenen hedef] · varsayılan HEAD
+# kanal: live · sunucu her satırı sırayla dener; biri bile tutmazsa kurulumu geri alır
+/ 200
+/en/ 200
+/markalar/ 200
+/en/brands/ 200
+/markalar/thinktool/ 200
+/en/brands/thinktool/ 200
+/markalar/autel/ 200
+/en/brands/autel/ 200
+/markalar/launch/ 200
+/en/brands/launch/ 200
+/markalar/jaltest/ 200
+/en/brands/jaltest/ 200
+/markalar/hedef-steering/ 200
+/en/brands/hedef-steering/ 200
+/markalar/hedef-ecu/ 200
+/en/brands/hedef-ecu/ 200
+/markalar/hedef-emulator/ 200
+/en/brands/hedef-emulator/ 200
+/markalar/dimsport/ 200
+/en/brands/dimsport/ 200
+/markalar/autodata/ 200
+/en/brands/autodata/ 200
+/cozumler/ 200
+/en/solutions/ 200
+/bayilik/ 200
+/en/dealership/ 200
+/destek/ 200
+/en/support/ 200
+/hakkimizda/ 200
+/en/about/ 200
+/iletisim/ 200
+/en/contact/ 200
+/kvkk/ 200
+/en/privacy/ 200
+/_next/static/chunks/06x0x-s50l8i-.js 200
+/_next/static/chunks/2vxjk1zhctqoy.css 200
+/fonts/jetbrains-mono-latin.4a79590165.woff2 200
+/category/news/ 301 /
+/dimsport/ 301 /markalar/dimsport/
+/urun/j-box-2-pass-thru-cihazi/ 301 /markalar/
+/urun/linshang-ls220-boya-olcum-cihazi-0-1um-hassasiyet/ 301 /markalar/
+/urun/volvo-vnl-euro-6-adblue-iptali/ 301 https://hedefemulator.com/urun/volvo-vnl-adblue-emulator
+/urun/daf-ariza-tespit-cihazi-davie-vci560/ 301 /markalar/jaltest/
+/urun/ford-tractor-euro-6-adblue-iptali/ 301 https://hedefemulator.com/urun/ford-traktor-euro-6-adblue-iptal-emulatoru
+/urun/kess-v2-chip-tuning-beyin-programlama-cihaz/ 301 /markalar/dimsport/
+/urun/thinkcar-t-wand-200/ 301 /markalar/thinktool/
+/urun/toyota-avensis-direksiyon-kutusu/ 301 https://hedefsteering.com/kapsam/
+/urun/fiat-punto-188-direksiyon-kutusu/ 301 https://hedefsteering.com/kapsam/
+/urun/volkswagen-yeni-polo-direksiyon-kutusu/ 301 https://hedefsteering.com/kapsam/
+/urun/opel-meriva-direksiyon-kutusu/ 301 https://hedefsteering.com/kapsam/
+/urun/ford-galaxy-smax-direksiyon-kutusu/ 301 https://hedefsteering.com/kapsam/
+/urun/crp-s7/ 301 /markalar/launch/
+/banner/shop/ 410
+/bu-adres-yok-hedef-test/ 404
+GET /api/form.php 405
+GET /api/yayin.php 405
+/api/_smtp_client.php 403
+/.well-known/hedef-yayin-test 404
+/robots.txt 200
+/sitemap.xml 200
+/version.txt 200
+/vas.txt 200
+/anydesk.exe 200
+/X-DIAG_PRO3S_3.14.049.apk 200
+http://hedefteknolojibilisim.com/hakkimizda/ 301 https://hedefteknolojibilisim.com/hakkimizda/
+https://www.hedefteknolojibilisim.com/iletisim/ 301 https://hedefteknolojibilisim.com/iletisim/

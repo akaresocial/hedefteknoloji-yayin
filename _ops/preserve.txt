@@ -1,0 +1,12 @@
+# otomatik — src/content/pages/support.ts · sunucu bu kök dosyaları asla taşımaz/silmez
+X-DIAG_PRO3S_3.14.049.apk
+DIAGZONE_PRO_100040.APK
+crpmot.apk
+anydesk.exe
+BeeProgv2.67.rar
+CarProgv04.74.rar
+radyokodlari.rar
+OPCOM08TR.rar
+vas.txt
+MercedesYardimci.exe
+turbovpn.apk

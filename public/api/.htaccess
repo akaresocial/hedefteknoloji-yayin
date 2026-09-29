@@ -1,0 +1,13 @@
+# otomatik üretildi (scripts/build-htaccess.mjs) — PHP uç noktaları arama motorlarına kapalı; _ ile başlayan iç dosyalar dışarıya kapalı
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+<FilesMatch "^_">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
