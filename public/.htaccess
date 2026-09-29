@@ -36,6 +36,10 @@ RewriteRule ^\.well-known/ - [L]
 RewriteRule (^|/)\. - [F,L]
 RewriteRule ^api/_ - [F,L]
 
+# Eski sitedeki davranış korunur: OpenAI GPTBot tarayıcısı engelli (önceki .htaccess)
+RewriteCond %{HTTP_USER_AGENT} GPTBot [NC]
+RewriteRule ^ - [F,L]
+
 # Kanonik adres: https + www olmadan (tek atlamada).
 # Hata sayfasının iç isteği (ErrorDocument → /404.html) yönlendirilmez; yoksa http'de 404 yerine 301 döner
 # (ör. /.well-known/ altında olmayan dosya — SSL doğrulaması 404 bekler).
@@ -317,6 +321,9 @@ RewriteRule ^urun-kategori/motorarizatespit/?$ /markalar/ [R=301,L]
 RewriteRule ^urun-kategori/chip-tuning-cihazlari/?$ /markalar/dimsport/ [R=301,L]
 RewriteRule ^urun-kategori/entegre-programlayicilar/?$ /markalar/ [R=301,L]
 RewriteRule ^urun-kategori/boya-olcum-cihazlari/?$ /markalar/ [R=301,L]
+
+# Eski /destek/ PHP klasöründeki indirme dosyası artık kökte (config/preserve-extra.txt)
+RewriteRule ^destek/(PureVPN-7\.2\.5\.apk)$ /$1 [R=301,L]
 
 # Listede olmayan eski ürün, kategori ve arşiv adresleri
 RewriteRule ^urun/ /markalar/ [R=301,L]
