@@ -174,7 +174,7 @@ if (!ht_rate_take(ht_rate_file($config, $live), ht_rate_key($ip), $perKey, $perH
 
 $to = trim((string) ht_smtp_env('FORM_TO', HT_FORM_TO_FALLBACK));
 if (!filter_var($to, FILTER_VALIDATE_EMAIL)) $to = HT_FORM_TO_FALLBACK;
-$title = $type === 'dealer' ? 'Bayilik başvurusu' : 'İletişim formu';
+$title = $type === 'dealer' ? 'Hedef ECU bayilik başvurusu' : 'İletişim formu';
 $subject = ($live ? '' : '[TEST] ')
   . $title . ' — ' . $f['name'] . ($f['company'] !== '' ? ' (' . $f['company'] . ')' : '');
 

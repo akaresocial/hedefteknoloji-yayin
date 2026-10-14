@@ -82,7 +82,7 @@ RewriteRule ^easytronic-sanziman-tamir/?$ https://hedefecu.com/hizmetler/ [R=301
 RewriteRule ^airbag-tamiri/?$ https://hedefecu.com/hizmetler/ [R=301,L]
 RewriteRule ^direksiyon-kutusu-tamiri/?$ https://hedefsteering.com/ [R=301,L]
 RewriteRule ^direksiyon-test-cihazi/?$ https://hedefsteering.com/eps-ehps-direksiyon-test-cihazi/ [R=301,L]
-RewriteRule ^dimsport-bayilik/?$ /bayilik/?marka=dimsport [R=301,L]
+RewriteRule ^dimsport-bayilik/?$ /bayilik/ [R=301,L]
 RewriteRule ^autodata/?$ /markalar/autodata/ [R=301,L]
 RewriteRule ^izmir-oto-bakim-ve-tamir-servisi/?$ https://hedefecu.com/ [R=301,L]
 RewriteRule ^adblue-iptali/?$ https://hedefecu.com/hizmetlerimiz/adblue_iptali/ [R=301,L]
